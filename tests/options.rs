@@ -1,9 +1,9 @@
 extern crate mpd;
-extern crate time;
+extern crate chrono;
 
 mod helpers;
+use chrono::Duration;
 use helpers::connect;
-use time::Duration;
 
 #[test]
 fn status() {
@@ -65,10 +65,12 @@ fn crossfade() {
     mpd.crossfade(1000).unwrap();
     assert_eq!(mpd.status().unwrap().crossfade, Some(Duration::seconds(1000)));
     mpd.crossfade(0).unwrap();
-    assert_eq!(mpd.status().unwrap().crossfade,
-               if mpd.version >= mpd::Version(0, 19, 0) {
-                   None
-               } else {
-                   Some(Duration::zero())
-               });
+    assert_eq!(
+        mpd.status().unwrap().crossfade,
+        if mpd.version >= mpd::Version(0, 19, 0) {
+            None
+        } else {
+            Some(Duration::zero())
+        }
+    );
 }

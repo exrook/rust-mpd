@@ -1,7 +1,6 @@
 #![feature(test)]
 
 extern crate mpd;
-extern crate time;
 extern crate test;
 extern crate unix_socket;
 

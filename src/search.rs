@@ -22,7 +22,8 @@ pub struct Filter<'a> {
 
 impl<'a> Filter<'a> {
     fn new<W>(typ: Term<'a>, what: W) -> Filter
-        where W: 'a + Into<Cow<'a, str>>
+    where
+        W: 'a + Into<Cow<'a, str>>,
     {
         Filter {
             typ: typ,
@@ -64,18 +65,19 @@ impl<'a> Query<'a> {
 impl<'a> fmt::Display for Term<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         f.write_str(match *self {
-                        Term::Any => "any",
-                        Term::File => "file",
-                        Term::Base => "base",
-                        Term::LastMod => "modified-since",
-                        Term::Tag(ref tag) => &*tag,
-                    })
+            Term::Any => "any",
+            Term::File => "file",
+            Term::Base => "base",
+            Term::LastMod => "modified-since",
+            Term::Tag(ref tag) => &*tag,
+        })
     }
 }
 
 impl<'a> ToArguments for &'a Term<'a> {
     fn to_arguments<F, E>(&self, f: &mut F) -> StdResult<(), E>
-        where F: FnMut(&str) -> StdResult<(), E>
+    where
+        F: FnMut(&str) -> StdResult<(), E>,
     {
         f(&self.to_string())
     }
@@ -83,7 +85,8 @@ impl<'a> ToArguments for &'a Term<'a> {
 
 impl<'a> ToArguments for &'a Filter<'a> {
     fn to_arguments<F, E>(&self, f: &mut F) -> StdResult<(), E>
-        where F: FnMut(&str) -> StdResult<(), E>
+    where
+        F: FnMut(&str) -> StdResult<(), E>,
     {
         (&self.typ).to_arguments(f)?;
         f(&self.what)
@@ -92,7 +95,8 @@ impl<'a> ToArguments for &'a Filter<'a> {
 
 impl<'a> ToArguments for &'a Query<'a> {
     fn to_arguments<F, E>(&self, f: &mut F) -> StdResult<(), E>
-        where F: FnMut(&str) -> StdResult<(), E>
+    where
+        F: FnMut(&str) -> StdResult<(), E>,
     {
         for filter in &self.filters {
             filter.to_arguments(f)?
@@ -103,7 +107,8 @@ impl<'a> ToArguments for &'a Query<'a> {
 
 impl ToArguments for Window {
     fn to_arguments<F, E>(&self, f: &mut F) -> StdResult<(), E>
-        where F: FnMut(&str) -> StdResult<(), E>
+    where
+        F: FnMut(&str) -> StdResult<(), E>,
     {
         if let Some(window) = self.0 {
             f("window")?;

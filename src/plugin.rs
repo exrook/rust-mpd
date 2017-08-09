@@ -4,7 +4,7 @@ use convert::FromIter;
 use error::Error;
 
 /// Decoder plugin
-#[derive(Clone, Debug, PartialEq, RustcEncodable)]
+#[derive(Clone, Debug, PartialEq, Serialize)]
 pub struct Plugin {
     /// name
     pub name: String,
@@ -25,10 +25,10 @@ impl FromIter for Vec<Plugin> {
                     plugin.map(|p| result.push(p));
 
                     plugin = Some(Plugin {
-                                      name: b,
-                                      suffixes: Vec::new(),
-                                      mime_types: Vec::new(),
-                                  });
+                        name: b,
+                        suffixes: Vec::new(),
+                        mime_types: Vec::new(),
+                    });
                 }
                 "mime_type" => {
                     plugin.as_mut().map(|p| p.mime_types.push(b));

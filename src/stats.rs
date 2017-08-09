@@ -1,13 +1,14 @@
 //! The module describes DB and playback statistics
 
+use chrono::{Duration, NaiveDateTime};
 use convert::FromIter;
 
 use error::Error;
-use rustc_serialize::{Encodable, Encoder};
-use time::{Duration, Timespec};
+use format::{duration_secs, time_secs};
+use serde::{Serialize, Serializer};
 
 /// DB and playback statistics
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize)]
 pub struct Stats {
     /// number of artists in DB
     pub artists: u32,
@@ -16,28 +17,17 @@ pub struct Stats {
     /// number of songs in DB
     pub songs: u32,
     /// total MPD uptime, seconds resolution
+    #[serde(with = "duration_secs")]
     pub uptime: Duration,
     /// total playback time, seconds resolution
+    #[serde(with = "duration_secs")]
     pub playtime: Duration,
     /// total playback time for all songs in DB, seconds resolution
+    #[serde(with = "duration_secs")]
     pub db_playtime: Duration,
     /// last DB update timestamp, seconds resolution
-    pub db_update: Timespec,
-}
-
-impl Encodable for Stats {
-    fn encode<S: Encoder>(&self, e: &mut S) -> Result<(), S::Error> {
-        e.emit_struct("Stats", 7, |e| {
-            e.emit_struct_field("artists", 0, |e| self.artists.encode(e))?;
-            e.emit_struct_field("albums", 1, |e| self.albums.encode(e))?;
-            e.emit_struct_field("songs", 2, |e| self.songs.encode(e))?;
-            e.emit_struct_field("uptime", 3, |e| self.uptime.num_seconds().encode(e))?;
-            e.emit_struct_field("playtime", 4, |e| self.playtime.num_seconds().encode(e))?;
-            e.emit_struct_field("db_playtime", 5, |e| self.db_playtime.num_seconds().encode(e))?;
-            e.emit_struct_field("db_update", 6, |e| self.db_update.sec.encode(e))?;
-            Ok(())
-        })
-    }
+    #[serde(with = "time_secs")]
+    pub db_update: NaiveDateTime,
 }
 
 impl Default for Stats {
@@ -49,7 +39,7 @@ impl Default for Stats {
             uptime: Duration::seconds(0),
             playtime: Duration::seconds(0),
             db_playtime: Duration::seconds(0),
-            db_update: Timespec::new(0, 0),
+            db_update: NaiveDateTime::from_timestamp(0, 0),
         }
     }
 }
@@ -68,7 +58,7 @@ impl FromIter for Stats {
                 "uptime" => result.uptime = Duration::seconds(try!(line.1.parse())),
                 "playtime" => result.playtime = Duration::seconds(try!(line.1.parse())),
                 "db_playtime" => result.db_playtime = Duration::seconds(try!(line.1.parse())),
-                "db_update" => result.db_update = Timespec::new(try!(line.1.parse()), 0),
+                "db_update" => result.db_update = NaiveDateTime::from_timestamp(try!(line.1.parse()), 0),
                 _ => (),
             }
         }

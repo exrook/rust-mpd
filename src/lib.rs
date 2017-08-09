@@ -32,12 +32,15 @@
 //! # }
 //! ```
 
-extern crate rustc_serialize;
-extern crate time;
+extern crate serde;
+#[macro_use]
+extern crate serde_derive;
+extern crate chrono;
 extern crate bufstream;
 
 mod macros;
 mod convert;
+mod format;
 pub mod error;
 pub mod version;
 pub mod reply;

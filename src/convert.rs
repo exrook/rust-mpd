@@ -1,6 +1,8 @@
 #![allow(missing_docs)]
 //! These are inner traits to support methods overloading for the `Client`
 
+
+use chrono::Duration;
 use error::Error;
 use output::Output;
 use playlist::Playlist;
@@ -8,8 +10,6 @@ use proto::ToArguments;
 use song::{self, Id, Song};
 use std::collections::BTreeMap;
 use std::ops::{Range, RangeFrom, RangeFull, RangeTo};
-
-use time::Duration;
 
 #[doc(hidden)]
 pub trait FromMap: Sized {
@@ -309,7 +309,8 @@ impl ToSongPath for AsRef<str> {
 
 impl<T: ToSongPath> ToArguments for T {
     fn to_arguments<F, E>(&self, f: &mut F) -> Result<(), E>
-        where F: FnMut(&str) -> Result<(), E>
+    where
+        F: FnMut(&str) -> Result<(), E>,
     {
         self.to_path().to_arguments(f)
     }

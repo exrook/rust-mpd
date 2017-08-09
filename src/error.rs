@@ -12,6 +12,7 @@
 //!
 //! This module defines all necessary infrastructure to represent these kinds or errors.
 
+use chrono::format::ParseError as ChronoParseError;
 use std::convert::From;
 use std::error::Error as StdError;
 use std::fmt;
@@ -20,7 +21,6 @@ use std::num::{ParseFloatError, ParseIntError};
 use std::result;
 use std::str::FromStr;
 use std::string::ParseError as StringParseError;
-use time::ParseError as TimeParseError;
 
 // Server errors {{{
 /// Server error codes, as defined in [libmpdclient](http://www.musicpd.org/doc/libmpdclient/protocol_8h_source.html)
@@ -142,11 +142,11 @@ impl FromStr for ServerError {
                             let command = s[left_brace + 1..right_brace].to_string();
                             let detail = s[right_brace + 1..].trim().to_string();
                             Ok(ServerError {
-                                   code: code,
-                                   pos: pos,
-                                   command: command,
-                                   detail: detail,
-                               })
+                                code: code,
+                                pos: pos,
+                                command: command,
+                                detail: detail,
+                            })
                         } else {
                             Err(ParseError::NoMessage)
                         }
@@ -236,8 +236,8 @@ impl From<ParseFloatError> for Error {
         Error::Parse(ParseError::BadFloat(e))
     }
 }
-impl From<TimeParseError> for Error {
-    fn from(e: TimeParseError) -> Error {
+impl From<ChronoParseError> for Error {
+    fn from(e: ChronoParseError) -> Error {
         Error::Parse(ParseError::BadTime(e))
     }
 }
@@ -260,7 +260,7 @@ pub enum ParseError {
     /// some other invalid value
     BadValue(String),
     /// date/time parsing error
-    BadTime(TimeParseError),
+    BadTime(ChronoParseError),
     /// invalid version format (should be x.y.z)
     BadVersion,
     /// the response is not an `ACK` (not an error)
@@ -329,8 +329,8 @@ impl StdError for ParseError {
     }
 }
 
-impl From<TimeParseError> for ParseError {
-    fn from(e: TimeParseError) -> ParseError {
+impl From<ChronoParseError> for ParseError {
+    fn from(e: ChronoParseError) -> ParseError {
         ParseError::BadTime(e)
     }
 }

@@ -36,7 +36,7 @@ use std::mem::forget;
 use std::str::FromStr;
 
 /// Subsystems for `idle` command
-#[derive(Clone, Copy, Debug, PartialEq, RustcEncodable)]
+#[derive(Clone, Copy, Debug, PartialEq, Serialize)]
 pub enum Subsystem {
     /// database: the song database has been modified after update.
     Database,
@@ -112,7 +112,8 @@ impl fmt::Display for Subsystem {
 use std::result::Result as StdResult;
 impl<'a> ::proto::ToArguments for Subsystem {
     fn to_arguments<F, E>(&self, f: &mut F) -> StdResult<(), E>
-        where F: FnMut(&str) -> StdResult<(), E>
+    where
+        F: FnMut(&str) -> StdResult<(), E>,
     {
         f(self.to_str())
     }

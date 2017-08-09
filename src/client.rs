@@ -30,7 +30,8 @@ use version::Version;
 /// Client connection
 #[derive(Debug)]
 pub struct Client<S = TcpStream>
-    where S: Read + Write
+where
+    S: Read + Write,
 {
     socket: BufStream<S>,
     /// MPD version
@@ -66,9 +67,9 @@ impl<S: Read + Write> Client<S> {
         let version = try!(banner[7..].trim().parse::<Version>());
 
         Ok(Client {
-               socket: socket,
-               version: version,
-           })
+            socket: socket,
+            version: version,
+        })
     }
     // }}}
 
@@ -377,14 +378,16 @@ impl<S: Read + Write> Client<S> {
 
     /// Find songs matching Query conditions.
     pub fn find<W>(&mut self, query: &Query, window: W) -> Result<Vec<Song>>
-        where W: Into<Window>
+    where
+        W: Into<Window>,
     {
         self.find_generic("find", query, window.into())
     }
 
     /// Case-insensitively search for songs matching Query conditions.
     pub fn search<W>(&mut self, query: &Query, window: W) -> Result<Vec<Song>>
-        where W: Into<Window>
+    where
+        W: Into<Window>,
     {
         self.find_generic("search", query, window.into())
     }
@@ -479,12 +482,8 @@ impl<S: Read + Write> Client<S> {
     /// List all channels available for current connection
     pub fn channels(&mut self) -> Result<Vec<Channel>> {
         self.run_command("channels", ()).and_then(|_| self.read_list("channel")).map(|v| {
-                                                                                         v.into_iter()
-                                                                                             .map(|b| unsafe {
-                                                                                                      Channel::new_unchecked(b)
-                                                                                                  })
-                                                                                             .collect()
-                                                                                     })
+            v.into_iter().map(|b| unsafe { Channel::new_unchecked(b) }).collect()
+        })
     }
 
     /// Read queued messages from subscribed channels
@@ -562,26 +561,27 @@ impl<S: Read + Write> Client<S> {
 
     /// List all stickers from a given object, identified by type and uri
     pub fn stickers(&mut self, typ: &str, uri: &str) -> Result<Vec<String>> {
-        self.run_command("sticker list", (typ, uri))
-            .and_then(|_| self.read_list("sticker"))
-            .map(|v| v.into_iter().map(|b| b.splitn(2, '=').nth(1).map(|s| s.to_owned()).unwrap()).collect())
+        self.run_command("sticker list", (typ, uri)).and_then(|_| self.read_list("sticker")).map(|v| {
+            v.into_iter().map(|b| b.splitn(2, '=').nth(1).map(|s| s.to_owned()).unwrap()).collect()
+        })
     }
 
     /// List all (file, sticker) pairs for sticker name and objects of given type
     /// from given directory (identified by uri)
     pub fn find_sticker(&mut self, typ: &str, uri: &str, name: &str) -> Result<Vec<(String, String)>> {
-        self.run_command("sticker find", (typ, uri, name))
-            .and_then(|_| {
-                self.read_pairs()
-                    .split("file")
-                    .map(|rmap| {
-                             rmap.map(|mut map| {
-                                          (map.remove("file").unwrap(),
-                                           map.remove("sticker").and_then(|s| s.splitn(2, '=').nth(1).map(|s| s.to_owned())).unwrap())
-                                      })
-                         })
-                    .collect()
-            })
+        self.run_command("sticker find", (typ, uri, name)).and_then(|_| {
+            self.read_pairs()
+                .split("file")
+                .map(|rmap| {
+                    rmap.map(|mut map| {
+                        (
+                            map.remove("file").unwrap(),
+                            map.remove("sticker").and_then(|s| s.splitn(2, '=').nth(1).map(|s| s.to_owned())).unwrap(),
+                        )
+                    })
+                })
+                .collect()
+        })
     }
 
     /// List all files of a given type under given directory (identified by uri)
@@ -610,7 +610,8 @@ impl<S: Read + Write> Proto for Client<S> {
     }
 
     fn run_command<I>(&mut self, command: &str, arguments: I) -> Result<()>
-        where I: ToArguments
+    where
+        I: ToArguments,
     {
         self.socket
             .write_all(command.as_bytes())
